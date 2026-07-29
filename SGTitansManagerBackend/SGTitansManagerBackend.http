@@ -1,0 +1,6 @@
+@SGTitansManagerBackend_HostAddress = http://localhost:5192
+
+GET {{SGTitansManagerBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
