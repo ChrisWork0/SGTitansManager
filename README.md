@@ -9,6 +9,7 @@ The application should be designed with a **scalable and modular UI structure** 
 * **Must be scalable for new pages**
 * Use a **single main window** as the application shell
 * Pages are displayed within the main window
+* A **Dashboard** should be used as **MainPage**
 * Navigation between pages is handled through:
 
   * `Buttons`
