@@ -26,8 +26,7 @@ public class Program
             options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
         
         builder.Services.AddDbContext<ManagerContext>(options => 
-            options.UseNpgsql(
-                builder.Configuration.GetConnectionString(connectionString)));
+            options.UseNpgsql(connectionString));
         
         StartApplication(builder.Build());
     }
@@ -37,6 +36,11 @@ public class Program
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
+
+        if (app.Environment.IsDevelopment())
+            using (var scope = app.Services.CreateScope())
+                scope.ServiceProvider.GetRequiredService<ManagerContext>().Database.Migrate();
+        
         app.Run();
     }
 }

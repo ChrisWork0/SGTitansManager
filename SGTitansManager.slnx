@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="compose.yaml" />
+  </Folder>
   <Project Path="SGTitansManager.Models/SGTitansManager.Models.csproj" />
   <Project Path="SGTitansManager/SGTitansManager.csproj" />
   <Project Path="SGTitansManagerBackend/SGTitansManagerBackend.csproj" />
