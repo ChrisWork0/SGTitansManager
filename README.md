@@ -6,6 +6,8 @@ The application should be designed with a **scalable and modular UI structure** 
 
 ### Requirements
 
+* Login decides what pages will be shown
+* After Login Member or Player will be created
 * **Must be scalable for new pages**
 * Use a **single main window** as the application shell
 * Pages are displayed within the main window
@@ -20,12 +22,15 @@ The application should be designed with a **scalable and modular UI structure** 
 ### Navigation Flow
 
 ```text
-Main Window
+Login Window
+│
+Main Window (Dashboard)
 │
 ├── Navigation
 │   ├── Tryouts
 │   ├── Member Management
-│   └── Appointments
+│   ├── Availability
+|   └── Appointments
 │
 └── Page Content
     └── Currently selected page
@@ -61,6 +66,18 @@ Potential functionality:
 * Assign roles
 * Manage player-specific information
 
+## Availabilities
+
+Page for managing availabilities
+
+Potential functionality:
+
+* View availability
+* Create availability
+* Edit availability
+* Delete availability
+* Filter availability after Date
+
 ## Appointments
 
 Page for managing appointments and events.
@@ -80,10 +97,11 @@ Potential functionality:
 The application consists of the following core models and enums:
 
 ```text
-Role
+User
 Member
 Availability
 Player
+PlayerRank
 Appointment
 ```
 
@@ -93,7 +111,6 @@ Additional enums and supporting models:
 Position
 RankType
 Rank
-PlayerRank
 AppointmentType
 ```
 
@@ -191,6 +208,51 @@ public enum AppointmentType
 
 # Models
 
+## BaseModel
+
+Id, Created and Deleted in one Model for inheritance.
+
+### Properies
+
+| Property  | Type        | Description               |
+|-----------|-------------|---------------------------|
+| `Id`      | `Guid`      | Id for reference to model |
+| `Created` | `DateTime`  | CreatedAt as LocalTime()  |
+| `Deleted` | `DateTime?` | DeletedAt as LocalTime()  |
+
+## User
+
+User setted by admin, who can interact with this application, specified by their role.
+
+### Properties
+
+| Property       | Type     | Description                  |
+|----------------|----------|------------------------------|
+| `UserName`     | `string` | Username for access verification |
+| `PasswordHash` | `string` | Stored as Hash               |
+| `LoggedIn`     | `bool`   | For unique login             |
+| `IsActive`     | `bool`   | For deactivating account     |
+| `Role`         | `Role`   | Role Access                  |
+| `MemberId`     | `Guid?`  | Reference to Member          |
+| `Member`       | `Member` | Admin add Member to User     |
+
+### Example
+
+```csharp
+public class User
+{
+    public string UserName { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public bool LoggedIn { get; set; }
+    public bool IsActive { get; set; }
+    public Role Role { get; set; }
+    public Guid MemberId { get; set; }
+    public Member? Member { get; set; }
+}
+```
+
+---
+
 ## Member
 
 Represents a general member of the organization.
@@ -199,11 +261,12 @@ A member can have **multiple roles**.
 
 ### Properties
 
-| Property      | Type         | Description                  |
-| ------------- | ------------ | ---------------------------- |
-| `DiscordName` | `string`     | Discord name of the member   |
-| `Roles`       | `List<Role>` | Roles assigned to the member |
-| `MemberSince` | `DateOnly`   | Date when the member joined  |
+| Property      | Type       | Description                  |
+|---------------|------------|------------------------------|
+| `DiscordName` | `string`   | Discord name of the member   |
+| `MemberSince` | `DateOnly` | Date when the member joined  |
+| `Player`      | `Player?`  | Connection to Player         |
+| `PlayerId`    | `Guid?`    | Possible reference to Player |
 
 ### Example
 
@@ -211,8 +274,9 @@ A member can have **multiple roles**.
 public class Member
 {
     public string DiscordName { get; set; } = string.Empty;
-    public List<Role> Roles { get; set; } = new();
     public DateOnly MemberSince { get; set; }
+    public Player? Player { get; set; }
+    public Guid? PlayerId { get; set; }
 }
 ```
 
@@ -224,21 +288,26 @@ Represents the availability of a member or player for each day of the week.
 
 ### Properties
 
-| Property    | Type     |
-| ----------- | -------- |
-| `Monday`    | `string` |
-| `Tuesday`   | `string` |
-| `Wednesday` | `string` |
-| `Thursday`  | `string` |
-| `Friday`    | `string` |
-| `Saturday`  | `string` |
-| `Sunday`    | `string` |
+| Property       | Type     |
+|----------------|----------|
+| `Year`         | `int`    |
+| `CalendarWeek` | `int`    |
+| `Monday`       | `string` |
+| `Tuesday`      | `string` |
+| `Wednesday`    | `string` |
+| `Thursday`     | `string` |
+| `Friday`       | `string` |
+| `Saturday`     | `string` |
+| `Sunday`       | `string` |
+| `PlayerId`     | `Guid`   |
 
 ### Example
 
 ```csharp
 public class Availability
 {
+    public int Year { get; set; }
+    public int CalendarWeek { get; set; }
     public string Monday { get; set; } = string.Empty;
     public string Tuesday { get; set; } = string.Empty;
     public string Wednesday { get; set; } = string.Empty;
@@ -246,6 +315,7 @@ public class Availability
     public string Friday { get; set; } = string.Empty;
     public string Saturday { get; set; } = string.Empty;
     public string Sunday { get; set; } = string.Empty;
+    public Guid PlayerId { get; set; }
 }
 ```
 
@@ -262,11 +332,14 @@ A player can have multiple `PlayerRank` entries, for example:
 
 ### Properties
 
-| Property   | Type       | Description              |
-| ---------- | ---------- | ------------------------ |
-| `RankType` | `RankType` | Type of ranking          |
-| `Rank`     | `Rank`     | Current rank             |
-| `Division` | `int`      | Division within the rank |
+| Property       | Type       | Description              |
+|----------------|------------|--------------------------|
+| `RankType`     | `RankType` | Type of ranking          |
+| `Rank`         | `Rank`     | Current rank             |
+| `Division`     | `int`      | Division within the rank |
+| `LeaguePoints` | `int`      | How many LP in Rank      |
+| `Player`       | `Player?`  | Player                   |
+| `PlayerId`     | `Guid`     | Reference to Player      |
 
 ### Example
 
@@ -276,6 +349,9 @@ public class PlayerRank
     public RankType RankType { get; set; }
     public Rank Rank { get; set; }
     public int Division { get; set; }
+    public int LeaguePoints { get; set; }
+    public Player? Player { get; set; }
+    public Guid PlayerId { get; set; }
 }
 ```
 
@@ -283,27 +359,21 @@ public class PlayerRank
 
 ## Player
 
-Represents a player and inherits from `Member`.
-
-```text
-Member
-  │
-  └── Player
-```
-
-A player automatically inherits all properties from `Member` and adds player-specific information.
+Represents a player.
 
 ### Properties
 
-| Property       | Type               | Description                                             |
-| -------------- | ------------------ | ------------------------------------------------------- |
-| `GameName`     | `string`           | In-game name of the player                              |
-| `Positions`    | `List<Position>`   | Positions the player can play                           |
-| `PlayerRanks`  | `List<PlayerRank>` | Ranks of the player                                     |
-| `Core`         | `bool`             | Indicates whether the player is part of the core roster |
-| `TryOut`       | `bool`             | Indicates whether the player is currently in a tryout   |
-| `Opgg`         | `string`           | Link to the player's OP.GG profile                      |
-| `Availability` | `Availability`     | Player's availability                                   |
+| Property          | Type                 | Description                                             |
+|-------------------|----------------------|---------------------------------------------------------|
+| `GameName`        | `string`             | In-game name of the player                              |
+| `Positions`       | `List<Position>`     | Positions the player can play                           |
+| `PlayerRanks`     | `List<PlayerRank>`   | Ranks of the player                                     |
+| `MainPosition`    | `Position?`          | Main position of the player                             |
+| `Core`            | `bool`               | Indicates whether the player is part of the core roster |
+| `CorePlayerImage` | `string`             | Stored player image                                     |
+| `TryOut`          | `bool`               | Indicates whether the player is currently in a tryout   |
+| `Opgg`            | `string`             | Link to the player's OP.GG profile                      |
+| `Availabilities`  | `List<Availability>` | Player's availabilities                                 |
 
 ### Example
 
@@ -311,18 +381,14 @@ A player automatically inherits all properties from `Member` and adds player-spe
 public class Player : Member
 {
     public string GameName { get; set; } = string.Empty;
-
     public List<Position> Positions { get; set; } = new();
-
     public List<PlayerRank> PlayerRanks { get; set; } = new();
-
+    public Position? MainPosition { get; set; }
     public bool Core { get; set; } = false;
-
+    public string CorePlayerImage { get; set; } = string.Empty;
     public bool TryOut { get; set; } = false;
-
     public string Opgg { get; set; } = string.Empty;
-
-    public Availability Availability { get; set; } = new();
+    public List<Availability> Availabilities { get; set; } = new();
 }
 ```
 
@@ -334,10 +400,11 @@ Represents an event or scheduled appointment.
 
 ### Properties
 
-| Property          | Type              | Description                      |
-| ----------------- | ----------------- | -------------------------------- |
-| `AppointmentType` | `AppointmentType` | Type of appointment              |
-| `Time`            | `DateTime`        | Date and time of the appointment |
+| Property          | Type              | Description                            |
+|-------------------|-------------------|----------------------------------------|
+| `AppointmentType` | `AppointmentType` | Type of appointment                    |
+| `TimeFrom`        | `DateTime`        | Date and time start of the appointment |
+| `TimeTo`          | `DateTime?`       | Date and time end of the appointment   |
 
 ### Example
 
@@ -345,69 +412,9 @@ Represents an event or scheduled appointment.
 public class Appointment
 {
     public AppointmentType AppointmentType { get; set; }
-
-    public DateTime Time { get; set; }
+    public DateTime TimeFrom { get; set; }
+    public DateTime? TimeTo { get; set; }
 }
-```
-
----
-
-# Model Relationships
-
-The basic model structure can be visualized as follows:
-
-```text
-                    ┌──────────────┐
-                    │    Member    │
-                    ├──────────────┤
-                    │ DiscordName  │
-                    │ Roles        │
-                    │ MemberSince  │
-                    └──────┬───────┘
-                           │
-                           │ inherits
-                           ▼
-                    ┌──────────────┐
-                    │    Player    │
-                    ├──────────────┤
-                    │ GameName     │
-                    │ Positions    │
-                    │ PlayerRanks  │
-                    │ Core         │
-                    │ TryOut       │
-                    │ Opgg         │
-                    │ Availability │
-                    └──────────────┘
-
-
-┌────────────────┐
-│  Availability  │
-├────────────────┤
-│ Monday         │
-│ Tuesday        │
-│ Wednesday      │
-│ Thursday       │
-│ Friday         │
-│ Saturday       │
-│ Sunday         │
-└────────────────┘
-
-
-┌────────────────┐
-│   PlayerRank   │
-├────────────────┤
-│ RankType       │
-│ Rank           │
-│ Division       │
-└────────────────┘
-
-
-┌────────────────┐
-│  Appointment   │
-├────────────────┤
-│ AppointmentType│
-│ Time           │
-└────────────────┘
 ```
 
 ---
@@ -415,25 +422,27 @@ The basic model structure can be visualized as follows:
 # Overall Structure
 
 ```text
-Application
+Application with Login
 │
 ├── Main Window
 │   │
 │   ├── Navigation
 │   │   ├── Tryouts
 │   │   ├── Member Management
+│   │   ├── Availabilities
 │   │   └── Appointments
 │   │
 │   └── Page Content
 │
-├── Models
+├── Models : BaseModel
 │   │
+│   ├── User
 │   ├── Member
 │   │   └── Player
-│   │       ├── Availability
-│   │       └── PlayerRank
+│   │       ├── Availabilities
+│   │       └── PlayerRanks
 │   │
-│   └── Appointment
+│   └── Appointments
 │
 └── Enums
     ├── Role
@@ -446,6 +455,7 @@ Application
 # Design Principles
 
 * The UI must be **scalable for additional pages**.
+* Unique Login for specified users.
 * The application should use a **single main window**.
 * Navigation should be centralized and consistent.
 * `Member` is the base class for general members.
