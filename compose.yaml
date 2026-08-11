@@ -1,0 +1,11 @@
+﻿services:
+  sgc_titans_db:
+    image: postgres:18
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Postgres.1
+      - POSTGRES_DB=sgc_titans
+      
+
