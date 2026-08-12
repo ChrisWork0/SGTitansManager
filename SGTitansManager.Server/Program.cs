@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using SGTitansManagerBackend.Database;
+using SGTitansManager.Server.Database;
 
-namespace SGTitansManagerBackend;
+namespace SGTitansManager.Server;
 
 public class Program
 {

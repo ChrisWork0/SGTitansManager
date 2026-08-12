@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SGTitansManager.Models;
 
-namespace SGTitansManagerBackend.Database;
+namespace SGTitansManager.Server.Database;
 
 public class ManagerContext : DbContext
 {

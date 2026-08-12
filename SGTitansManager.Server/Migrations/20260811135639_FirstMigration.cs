@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SGTitansManagerBackend.Migrations
+namespace SGTitansManager.Server.Migrations
 {
     /// <inheritdoc />
     public partial class FirstMigration : Migration
