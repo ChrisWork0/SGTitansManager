@@ -174,8 +174,8 @@ Application with Login
 * The application should use a **single main window**.
 * Navigation should be centralized and consistent.
 * `Member` is the base class for general members.
-* `Player` inherits from `Member`.
 * A `Member` can have **multiple roles**.
+* A `Member` can have one `Player`.
 * A `Player` can have **multiple positions**.
 * A `Player` can have **multiple ranks**, depending on the `RankType`.
 * Player-specific information should only be stored in `Player`.
