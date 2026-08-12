@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace SGTitansManager
+namespace SGTitansManager.Wpf
 {
     /// <summary>
     /// Interaction logic for App.xaml

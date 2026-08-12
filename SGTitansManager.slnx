@@ -4,5 +4,5 @@
   </Folder>
   <Project Path="SGTitansManager.Models/SGTitansManager.Models.csproj" />
   <Project Path="SGTitansManager.Server\SGTitansManager.Server.csproj" />
-  <Project Path="SGTitansManager/SGTitansManager.csproj" />
+  <Project Path="SGTitansManager.Wpf/SGTitansManager.Wpf.csproj" />
 </Solution>

@@ -22,7 +22,7 @@ namespace SGTitansManager.Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("SGTitansManager.Models.Appointment", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.Appointment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -49,7 +49,7 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("Appointments");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.Availability", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.Availability", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -105,7 +105,7 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("Availabilities");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.Member", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.Member", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -135,7 +135,7 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("Members");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.Player", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.Player", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -177,7 +177,7 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("Players");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.PlayerRank", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.PlayerRank", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -213,7 +213,7 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("PlayerRanks");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.User", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -253,28 +253,28 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.Availability", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.Availability", b =>
                 {
-                    b.HasOne("SGTitansManager.Models.Player", null)
+                    b.HasOne("SGTitansManager.Wpf.Models.Player", null)
                         .WithMany("Availabilities")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.Member", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.Member", b =>
                 {
-                    b.HasOne("SGTitansManager.Models.Player", "Player")
+                    b.HasOne("SGTitansManager.Wpf.Models.Player", "Player")
                         .WithOne()
-                        .HasForeignKey("SGTitansManager.Models.Member", "PlayerId")
+                        .HasForeignKey("SGTitansManager.Wpf.Models.Member", "PlayerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.PlayerRank", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.PlayerRank", b =>
                 {
-                    b.HasOne("SGTitansManager.Models.Player", "Player")
+                    b.HasOne("SGTitansManager.Wpf.Models.Player", "Player")
                         .WithMany("PlayerRanks")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -283,18 +283,18 @@ namespace SGTitansManager.Server.Migrations
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.User", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.User", b =>
                 {
-                    b.HasOne("SGTitansManager.Models.Member", "Member")
+                    b.HasOne("SGTitansManager.Wpf.Models.Member", "Member")
                         .WithOne()
-                        .HasForeignKey("SGTitansManager.Models.User", "MemberId")
+                        .HasForeignKey("SGTitansManager.Wpf.Models.User", "MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.Player", b =>
+            modelBuilder.Entity("SGTitansManager.Wpf.Models.Player", b =>
                 {
                     b.Navigation("Availabilities");
 
