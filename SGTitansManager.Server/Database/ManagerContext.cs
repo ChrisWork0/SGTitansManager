@@ -13,6 +13,7 @@ public class ManagerContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Player> Players { get; set; }
     public DbSet<PlayerRank> PlayerRanks { get; set; }
+    public DbSet<History> Histories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
