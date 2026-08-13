@@ -18,9 +18,9 @@ public class LoginController : ControllerBase
         _userRepo = new UserRepository(dbContext);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Login(LoginDto loginDto)
-    {
-        
-    }
+    // [HttpPost]
+    // public async Task<IActionResult> Login(LoginDto loginDto)
+    // {
+    //     
+    // }
 }
