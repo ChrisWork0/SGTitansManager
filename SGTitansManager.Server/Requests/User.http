@@ -1,4 +1,4 @@
-@userId = 019fffdc-278b-7dca-980d-d264fdef6162
+@userId = 019ffff8-83aa-7524-a40a-f7f49f9583b6
 
 ### GET Users
 GET {{BaseUrl}}/api/User

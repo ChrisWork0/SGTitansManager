@@ -98,14 +98,6 @@ public class ManagerContext : DbContext
                 .HasConversion<UtcToLocalDateTimeConverter>();
         });
         
-        modelBuilder.Entity<Member>(e =>
-        {
-            e.Property(a => a.Created)
-                .HasConversion<UtcToLocalDateTimeConverter>();
-            e.Property(a => a.Deleted)
-                .HasConversion<UtcToLocalDateTimeConverter>();
-        });
-        
         modelBuilder.Entity<Player>(e =>
         {
             e.Property(a => a.Created)
