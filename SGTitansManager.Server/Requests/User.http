@@ -1,0 +1,57 @@
+@userId = 019fffdc-278b-7dca-980d-d264fdef6162
+
+### GET Users
+GET {{BaseUrl}}/api/User
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+> {% 
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+ %}
+
+### Get User by Id
+GET {{BaseUrl}}/api/User/{{userId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+%}
+
+### Activate/Deactivate User Access
+PUT {{BaseUrl}}/api/User/{{userId}}?active=true
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 204, "Response status is not 204");
+    })
+%}
+
+### Create User
+POST {{BaseUrl}}/api/User
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+{
+  "userName": "test",
+  "password": "test",
+  "memberSince": "2026-08-14",
+  "discordName": "test",
+  "role": 4
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 204, "Response status is not 204");
+    })
+%}

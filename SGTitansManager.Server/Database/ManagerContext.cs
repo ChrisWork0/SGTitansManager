@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SGTitansManager.Models;
+using SGTitansManager.Server.Services;
 
 namespace SGTitansManager.Server.Database;
 
@@ -22,7 +23,7 @@ public class ManagerContext : DbContext
         
         // Enums werden als String in Datenbank gespeichert
         // zur vereinfachten Lesbarkeit
-        
+
         modelBuilder.Entity<Appointment>()
             .Property(a => a.AppointmentType)
             .HasConversion<string>();
@@ -70,5 +71,86 @@ public class ManagerContext : DbContext
             .HasOne<Player>()
             .WithMany(p => p.Availabilities)
             .HasForeignKey(a => a.PlayerId);
+        
+        // Convert DateTime
+
+        modelBuilder.Entity<Availability>(e =>
+        {
+            e.Property(a => a.Created)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+            e.Property(a => a.Deleted)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+        });
+        
+        modelBuilder.Entity<Appointment>(e =>
+        {
+            e.Property(a => a.Created)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+            e.Property(a => a.Deleted)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+        });
+        
+        modelBuilder.Entity<History>(e =>
+        {
+            e.Property(a => a.Created)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+            e.Property(a => a.Deleted)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+        });
+        
+        modelBuilder.Entity<Member>(e =>
+        {
+            e.Property(a => a.Created)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+            e.Property(a => a.Deleted)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+        });
+        
+        modelBuilder.Entity<Player>(e =>
+        {
+            e.Property(a => a.Created)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+            e.Property(a => a.Deleted)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+        });
+        
+        modelBuilder.Entity<User>(e =>
+        {
+            e.Property(a => a.Created)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+            e.Property(a => a.Deleted)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+        });
+        
+        modelBuilder.Entity<PlayerRank>(e =>
+        {
+            e.Property(a => a.Created)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+            e.Property(a => a.Deleted)
+                .HasConversion<UtcToLocalDateTimeConverter>();
+        });
+        
+        // Default Data
+        
+        modelBuilder.Entity<Member>()
+            .HasData(new
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                DiscordName = "Admin",
+                MemberSince = new DateOnly(2026, 8, 14),
+                Created = DateTime.MinValue
+            });
+        
+        modelBuilder.Entity<User>()
+            .HasData(new
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                UserName = "admin",
+                PasswordHash = "admin".Sha256(),
+                Role = Role.Admin,
+                IsActive = true,
+                MemberId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                Created = DateTime.MinValue
+            });
     }
 }

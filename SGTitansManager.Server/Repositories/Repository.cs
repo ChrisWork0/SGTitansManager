@@ -17,8 +17,12 @@ public class Repository<TModel> where TModel : BaseModel
         DbSet = _dbContext.Set<TModel>();
     }
 
-    public virtual async Task<List<TModel>> Get()
-        => await DbSet.ToListAsync();
+    public virtual async Task<List<TModel>> Get(bool withDeleted = false)
+    {
+        if (withDeleted)
+            return await DbSet.Where(m => m.Deleted != null).ToListAsync();
+        return await DbSet.ToListAsync();
+    }
 
     public virtual async Task<TModel?> GetById(Guid id) 
         => await DbSet.FirstOrDefaultAsync(m => m.Id == id);
