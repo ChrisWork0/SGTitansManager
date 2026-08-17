@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SGTitansManager.Models;
 using SGTitansManager.Server.Database;
 using SGTitansManager.Server.Repositories;
 using SGTitansManager.Server.Services;

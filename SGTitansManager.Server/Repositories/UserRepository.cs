@@ -1,7 +1,10 @@
+using System.Numerics;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using SGTitansManager.Models;
 using SGTitansManager.Server.Database;
 using SGTitansManager.Server.Helper;
+using SGTitansManager.Server.Services;
 
 namespace SGTitansManager.Server.Repositories;
 
@@ -19,13 +22,14 @@ public class UserRepository : Repository<User>
                                              && u.PasswordHash == passwordHash 
                                              && u.IsActive);
 
-    public async Task<ResultDto> DeactivateUser(Guid userId, bool isActive)
+    public override Task<ResultDto> Patch(Guid id, JsonPatchDocument updates)
     {
-        var user = await DbSet.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null)
-            return Result.UnSuccess(404, "User not found");
-        user.IsActive = isActive;
-        await Save();
-        return Result.Success($"Successfully changed user to active = {isActive}");
+        foreach (var operation in updates.Operations)
+        {
+            if (operation.path == "/passwordHash")
+                operation.value = (operation.value.ToString() 
+                                   ?? throw new InvalidOperationException()).Sha256();
+        }
+        return base.Patch(id, updates);
     }
 }

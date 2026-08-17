@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SGTitansManager.Models;
 using SGTitansManager.Server.Database;
@@ -9,7 +10,6 @@ namespace SGTitansManager.Server.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = Policies.AdminOnly)]
 
 public class UserController : ControllerBase
 {
@@ -20,6 +20,7 @@ public class UserController : ControllerBase
         _userRepo = new UserRepository(context);
     }
 
+    [Authorize(Policy = Policies.AdminOnly)]
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery]bool withDeleted = false)
     {
@@ -33,9 +34,14 @@ public class UserController : ControllerBase
         }));
     }
 
+    [Authorize]
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetById(Guid userId)
     {
+        if (!HttpContext.User.IsInRole(nameof(Role.Admin))
+                                       && userId != Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "userId").Value))
+            return Forbid();
+        
         var user = await _userRepo.GetByIncludes(userId, ["Member"]);
         if (user == null)
             return NotFound();
@@ -49,6 +55,7 @@ public class UserController : ControllerBase
         });
     }
 
+    [Authorize(Policy = Policies.AdminOnly)]
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] CreateUserDto createUser)
     {
@@ -70,13 +77,14 @@ public class UserController : ControllerBase
         await _userRepo.AddAndSave(user);
         return NoContent();
     }
-    
-    [HttpPut("{userId}")]
-    public async Task<IActionResult> ActivateUser(Guid userId, [FromQuery] bool active)
+
+    [Authorize(Policy = Policies.AdminOnly)]
+    [HttpPatch("{userId}")]
+    public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument updates)
     {
-        var result = await _userRepo.DeactivateUser(userId, active);
+        var result = await _userRepo.Patch(userId,  updates);
         if (!result.Success)
-            return NotFound(result.Message);
-        return Ok(result.Message);
+            return StatusCode(result.StatusCode ?? 500);
+        return Ok(result.Model);
     }
 }
