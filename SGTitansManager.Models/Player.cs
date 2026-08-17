@@ -11,6 +11,7 @@ public class Player : BaseModel
     public bool TryOut {get; set;}
     public string Opgg { get; set; } = "";
     public List<Availability> Availabilities { get; set; } = [];
+    public List<ChampionPoolItem> ChampionPool { get; set; } = [];
 }
 
 public enum Position

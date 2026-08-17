@@ -24,8 +24,6 @@ public class Program
         if (string.IsNullOrEmpty(connectionString))
             throw new InvalidOperationException("Please set connection string in appsettings.json");
         
-        
-        
         builder.Services.AddOpenApi();
 
         builder.Services.AddControllers().AddNewtonsoftJson(options => 
