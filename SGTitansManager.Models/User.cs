@@ -4,7 +4,6 @@ public class User : BaseModel
 {
     public string UserName { get; set; } = "";
     public string PasswordHash { get; set; } = "";
-    public bool LoggedIn { get; set; }
     public bool IsActive { get; set; }
     public Role Role { get; set; }
     public Guid MemberId { get; set; }
@@ -13,8 +12,10 @@ public class User : BaseModel
 
 public enum Role
 {
+    Admin,
     Manager,
     Coach,
+    CorePlayer,
     Player,
     Caster
 }

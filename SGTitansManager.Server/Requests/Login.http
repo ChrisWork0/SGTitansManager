@@ -1,0 +1,16 @@
+### Login
+POST {{BaseUrl}}/api/Login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "userName": "admin",
+  "password": "admin"
+}
+
+> {% 
+    client.test("Requested executed successfully", function () {
+        client.assert(response.status === 204, "Response status is not 204");
+    })
+    client.global.set("jwt", response.headers.valueOf("Authorization"))
+ %}

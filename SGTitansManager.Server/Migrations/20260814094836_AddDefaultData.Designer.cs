@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SGTitansManager.Server.Database;
@@ -12,9 +13,11 @@ using SGTitansManager.Server.Database;
 namespace SGTitansManager.Server.Migrations
 {
     [DbContext(typeof(ManagerContext))]
-    partial class ManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20260814094836_AddDefaultData")]
+    partial class AddDefaultData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,6 +162,12 @@ namespace SGTitansManager.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("DiscordName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -180,6 +189,7 @@ namespace SGTitansManager.Server.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            Created = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DiscordName = "Admin",
                             MemberSince = new DateOnly(2026, 8, 14)
                         });
