@@ -4,8 +4,8 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "userName": "test",
-  "password": "test"
+  "userName": "admin",
+  "password": "admin"
 }
 
 > {% 
