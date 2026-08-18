@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SGTitansManager.Models;
+using SGTitansManager.Models.Dtos;
 using SGTitansManager.Server.Database;
 using SGTitansManager.Server.Repositories;
 using SGTitansManager.Server.Services;
@@ -42,7 +43,7 @@ public class UserController : ControllerBase
                                        && userId != Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "userId").Value))
             return Forbid();
         
-        var user = await _userRepo.GetByIncludes(userId, ["Member"]);
+        var user = await _userRepo.GetByIdWithIncludes(userId, [nameof(UserDto.Member)]);
         if (user == null)
             return NotFound();
         return Ok(new UserDto
@@ -80,7 +81,7 @@ public class UserController : ControllerBase
 
     [Authorize(Policy = Policies.AdminOnly)]
     [HttpPatch("{userId}")]
-    public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument updates)
+    public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument<User> updates)
     {
         var result = await _userRepo.Patch(userId,  updates);
         if (!result.Success)
