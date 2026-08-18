@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SGTitansManager.Models;
 using SGTitansManager.Server.Services;
 
@@ -50,8 +51,14 @@ public class ManagerContext : DbContext
         modelBuilder.Entity<Champion>()
             .Property(p => p.Tags)
             .HasConversion(
-                v => v.Select(e => e.ToString()).ToArray(),
-                v => v.Select(Enum.Parse<Tag>).ToList());
+                v => string.Join(',', v.Select(e => e.ToString())),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => Enum.Parse<Tag>(s, ignoreCase: true))
+                    .ToList())
+            .Metadata.SetValueComparer(new ValueComparer<List<Tag>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (hash, e) => HashCode.Combine(hash, e)),
+                c => c.ToList()));
         
         // 1:1 Beziehungen
         

@@ -24,6 +24,7 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+      <PackageReference Include="Spectre.Console" Version="0.57.3-alpha.0.7" />
     </ItemGroup>
 
 </Project>
