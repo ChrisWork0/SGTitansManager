@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SGTitansManager.Models;
 using SGTitansManager.Server.Services;
 
@@ -10,6 +11,7 @@ public class ManagerContext : DbContext
     
     public DbSet<Appointment> Appointments { get; set; }
     public DbSet<Availability> Availabilities { get; set; }
+    public DbSet<Champion> Champions { get; set; }
     public DbSet<Member> Members { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Player> Players { get; set; }
@@ -46,6 +48,18 @@ public class ManagerContext : DbContext
                 v => v.Select(e => e.ToString()).ToArray(),
                 v => v.Select(Enum.Parse<Position>).ToList());
         
+        modelBuilder.Entity<Champion>()
+            .Property(p => p.Tags)
+            .HasConversion(
+                v => string.Join(',', v.Select(e => e.ToString())),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => Enum.Parse<Tag>(s, ignoreCase: true))
+                    .ToList())
+            .Metadata.SetValueComparer(new ValueComparer<List<Tag>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (hash, e) => HashCode.Combine(hash, e)),
+                c => c.ToList()));
+        
         // 1:1 Beziehungen
         
         modelBuilder.Entity<Member>()
@@ -60,6 +74,12 @@ public class ManagerContext : DbContext
             .HasForeignKey<User>(u => u.MemberId)
             .OnDelete(DeleteBehavior.Cascade);
         
+        modelBuilder.Entity<ChampionPoolItem>()
+            .HasOne(c  => c.Champion)
+            .WithOne()
+            .HasForeignKey<Champion>(c => c.Id)
+            .OnDelete(DeleteBehavior.Cascade);
+        
         // 1:n Beziehungen
 
         modelBuilder.Entity<PlayerRank>()
@@ -71,6 +91,21 @@ public class ManagerContext : DbContext
             .HasOne<Player>()
             .WithMany(p => p.Availabilities)
             .HasForeignKey(a => a.PlayerId);
+
+        modelBuilder.Entity<ChampionPoolItem>()
+            .HasOne<Player>()
+            .WithMany(p => p.ChampionPool)
+            .HasForeignKey(c => c.PlayerId);
+        
+        // Set Primary Key
+
+        modelBuilder.Entity<ChampionPoolItem>(e =>
+        {
+            e.HasKey(c => new {c.ChampionId, c.PlayerId});
+            e.HasOne(c => c.Champion)
+                .WithMany()
+                .HasForeignKey(c => c.ChampionId);
+        });
         
         // Convert DateTime
 
