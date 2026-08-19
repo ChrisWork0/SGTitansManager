@@ -19,15 +19,15 @@ public class Repository<TModel> where TModel : BaseModel
 
     public virtual async Task<List<TModel>> Get(bool withDeleted = false)
     {
-        if (withDeleted)
-            return await DbSet.Where(m => m.Deleted != null).ToListAsync();
+        if (!withDeleted)
+            return await DbSet.Where(m => m.Deleted == null).ToListAsync();
         return await DbSet.ToListAsync();
     }
 
-    public virtual async Task<TModel?> GetById(Guid id) 
+    private async Task<TModel?> GetById(Guid id) 
         => await DbSet.FirstOrDefaultAsync(m => m.Id == id);
     
-    public virtual async Task<TModel?> GetByIncludes(Guid id, string[]? includes = null)
+    public virtual async Task<TModel?> GetByIdWithIncludes(Guid id, string[]? includes = null)
     {
         IQueryable<TModel> set = DbSet;
         if (includes == null)
@@ -59,7 +59,7 @@ public class Repository<TModel> where TModel : BaseModel
     public virtual async Task<int> Count()
         => await DbSet.CountAsync();
 
-    public virtual async Task<ResultDto> Patch(Guid id, JsonPatchDocument updates)
+    public virtual async Task<ResultDto> Patch(Guid id, JsonPatchDocument<TModel> updates)
     {
         var model = await GetById(id);
         if (model == null)

@@ -13,7 +13,7 @@ public class ManagerContext : DbContext
     public DbSet<Availability> Availabilities { get; set; }
     public DbSet<Champion> Champions { get; set; }
     public DbSet<Member> Members { get; set; }
-    public DbSet<User> Users { get; set; }
+    public DbSet<AppUser> Users { get; set; }
     public DbSet<Player> Players { get; set; }
     public DbSet<PlayerRank> PlayerRanks { get; set; }
     public DbSet<History> Histories { get; set; }
@@ -45,8 +45,14 @@ public class ManagerContext : DbContext
         modelBuilder.Entity<Player>()
             .Property(p => p.Positions)
             .HasConversion(
-                v => v.Select(e => e.ToString()).ToArray(),
-                v => v.Select(Enum.Parse<Position>).ToList());
+                v => string.Join(',', v.Select(e => e.ToString())),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => Enum.Parse<Position>(s, ignoreCase: true))
+                    .ToList())
+            .Metadata.SetValueComparer(new ValueComparer<List<Position>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (hash, e) => HashCode.Combine(hash, e)),
+                c => c.ToList()));
         
         modelBuilder.Entity<Champion>()
             .Property(p => p.Tags)
@@ -68,10 +74,10 @@ public class ManagerContext : DbContext
             .HasForeignKey<Member>(m => m.PlayerId)
             .OnDelete(DeleteBehavior.SetNull);
         
-        modelBuilder.Entity<User>()
+        modelBuilder.Entity<AppUser>()
             .HasOne(u => u.Member)
             .WithOne()
-            .HasForeignKey<User>(u => u.MemberId)
+            .HasForeignKey<AppUser>(u => u.MemberId)
             .OnDelete(DeleteBehavior.Cascade);
         
         modelBuilder.Entity<ChampionPoolItem>()
@@ -141,7 +147,7 @@ public class ManagerContext : DbContext
                 .HasConversion<UtcToLocalDateTimeConverter>();
         });
         
-        modelBuilder.Entity<User>(e =>
+        modelBuilder.Entity<AppUser>(e =>
         {
             e.Property(a => a.Created)
                 .HasConversion<UtcToLocalDateTimeConverter>();
@@ -157,18 +163,28 @@ public class ManagerContext : DbContext
                 .HasConversion<UtcToLocalDateTimeConverter>();
         });
         
+        // Set DiscordUser Unique
+        
+        modelBuilder.Entity<Member>()
+            .Property(p => p.DiscordUser)
+            .IsRequired()
+            .HasMaxLength(20);
+        
+        modelBuilder.Entity<Member>()
+            .HasIndex(p => p.DiscordUser)
+            .IsUnique();
+        
         // Default Data
         
         modelBuilder.Entity<Member>()
-            .HasData(new
+            .HasData(new Member
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                DiscordName = "Admin",
+                DiscordUser = "00000000000000000000",
                 MemberSince = new DateOnly(2026, 8, 14),
-                Created = DateTime.MinValue
             });
         
-        modelBuilder.Entity<User>()
+        modelBuilder.Entity<AppUser>()
             .HasData(new
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),

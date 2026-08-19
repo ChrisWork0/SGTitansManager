@@ -1,6 +1,4 @@
-using SGTitansManager.Models;
-
-namespace SGTitansManager.Server;
+namespace SGTitansManager.Models.Dtos;
 
 public class UserDto
 {

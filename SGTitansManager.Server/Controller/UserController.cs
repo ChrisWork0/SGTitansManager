@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SGTitansManager.Models;
+using SGTitansManager.Models.Dtos;
 using SGTitansManager.Server.Database;
 using SGTitansManager.Server.Repositories;
 using SGTitansManager.Server.Services;
@@ -42,7 +43,7 @@ public class UserController : ControllerBase
                                        && userId != Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "userId").Value))
             return Forbid();
         
-        var user = await _userRepo.GetByIncludes(userId, ["Member"]);
+        var user = await _userRepo.GetUserWithMemberAndPlayer(userId);
         if (user == null)
             return NotFound();
         return Ok(new UserDto
@@ -59,13 +60,15 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] CreateUserDto createUser)
     {
+        if (createUser.DiscordId.Length < 17)
+            return BadRequest("No valid Discord ID");
         var member = new Member
         {
-            DiscordName = createUser.DiscordName,
+            DiscordUser = createUser.DiscordId,
             MemberSince = createUser.MemberSince
         };
         
-        var user = new User
+        var user = new AppUser
         {
             PasswordHash = createUser.Password.Sha256(),
             UserName = createUser.UserName,
@@ -80,7 +83,7 @@ public class UserController : ControllerBase
 
     [Authorize(Policy = Policies.AdminOnly)]
     [HttpPatch("{userId}")]
-    public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument updates)
+    public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument<AppUser> updates)
     {
         var result = await _userRepo.Patch(userId,  updates);
         if (!result.Success)

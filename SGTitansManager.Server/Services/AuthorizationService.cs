@@ -20,13 +20,13 @@ public class AuthorizationService
         _expirationDays = Convert.ToInt32(config.GetSection("JwtSettings").GetSection("JwtExpiresDays").Value);
     }
 
-    public string CreateJsonWebToken(User user)
+    public string CreateJsonWebToken(AppUser appUser)
     {
         var claims = new List<Claim>()
         {
-            new("username", $"{user.UserName}"),
-            new("userId", user.Id.ToString()),
-            new(ClaimTypes.Role, user.Role.ToString())
+            new("username", $"{appUser.UserName}"),
+            new("userId", appUser.Id.ToString()),
+            new(ClaimTypes.Role, appUser.Role.ToString())
         };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -54,7 +54,7 @@ Authorization: {{jwt}}
   "userName": "test",
   "password": "test",
   "memberSince": "2026-08-14",
-  "discordName": "test",
+  "discordId": "00000000000000000001",
   "role": 4
 }
 

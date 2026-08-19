@@ -1,0 +1,84 @@
+@playerId = 01a018c8-ced0-763b-bf04-ffb6bb694b66
+@userId = 019ffff8-83aa-7524-a40a-f7f49f9583b6
+
+### GET Players
+GET {{BaseUrl}}/api/Player
+Accept: application/json
+Content-Type: application/json
+Authorization: {{jwt}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+%}
+
+### Get Player
+GET {{BaseUrl}}/api/Player/{{playerId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: {{jwt}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+%}
+
+### Create Player
+POST {{BaseUrl}}/api/Player/{{userId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: {{jwt}}
+
+{
+  "gameName": "SGC Tester#SGC",
+  "mainPosition": "Top",
+  "core": true,
+  "tryout": false,
+  "opgg": "https://op.gg"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+%}
+
+### Update Player
+PATCH {{BaseUrl}}/api/Player/{{playerId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: {{jwt}}
+
+[
+  {
+    "op": "replace",
+    "path": "/core",
+    "value": false
+  }
+]
+
+### Delete Player
+DELETE {{BaseUrl}}/api/Player/{{playerId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: {{jwt}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 204, "Response status is not 204");
+    })
+%}
+
+### Restore Player
+PUT {{BaseUrl}}/api/Player/{{playerId}}?toUser={{userId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: {{jwt}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+%}

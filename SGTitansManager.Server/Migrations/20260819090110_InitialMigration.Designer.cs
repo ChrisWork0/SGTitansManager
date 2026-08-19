@@ -13,8 +13,8 @@ using SGTitansManager.Server.Database;
 namespace SGTitansManager.Server.Migrations
 {
     [DbContext(typeof(ManagerContext))]
-    [Migration("20260812081911_AddHistory")]
-    partial class AddHistory
+    [Migration("20260819090110_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,55 @@ namespace SGTitansManager.Server.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("SGTitansManager.Models.AppUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            Created = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            MemberId = new Guid("00000000-0000-0000-0000-000000000001"),
+                            PasswordHash = "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=",
+                            Role = 0,
+                            UserName = "admin"
+                        });
+                });
 
             modelBuilder.Entity("SGTitansManager.Models.Appointment", b =>
                 {
@@ -109,6 +158,49 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("Availabilities");
                 });
 
+            modelBuilder.Entity("SGTitansManager.Models.Champion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Champions");
+                });
+
+            modelBuilder.Entity("SGTitansManager.Models.ChampionPoolItem", b =>
+                {
+                    b.Property<int>("ChampionId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SkillLevel")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ChampionId", "PlayerId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("ChampionPoolItem");
+                });
+
             modelBuilder.Entity("SGTitansManager.Models.History", b =>
                 {
                     b.Property<Guid>("Id")
@@ -162,15 +254,10 @@ namespace SGTitansManager.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("Deleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DiscordName")
+                    b.Property<string>("DiscordUser")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateOnly>("MemberSince")
                         .HasColumnType("date");
@@ -180,10 +267,21 @@ namespace SGTitansManager.Server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DiscordUser")
+                        .IsUnique();
+
                     b.HasIndex("PlayerId")
                         .IsUnique();
 
                     b.ToTable("Members");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            DiscordUser = "00000000000000000000",
+                            MemberSince = new DateOnly(2026, 8, 14)
+                        });
                 });
 
             modelBuilder.Entity("SGTitansManager.Models.Player", b =>
@@ -216,9 +314,9 @@ namespace SGTitansManager.Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string[]>("Positions")
+                    b.Property<string>("Positions")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TryOut")
                         .HasColumnType("boolean");
@@ -264,44 +362,15 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("PlayerRanks");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.User", b =>
+            modelBuilder.Entity("SGTitansManager.Models.AppUser", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.HasOne("SGTitansManager.Models.Member", "Member")
+                        .WithOne()
+                        .HasForeignKey("SGTitansManager.Models.AppUser", "MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("Deleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("LoggedIn")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("MemberId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MemberId")
-                        .IsUnique();
-
-                    b.ToTable("Users");
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("SGTitansManager.Models.Availability", b =>
@@ -311,6 +380,23 @@ namespace SGTitansManager.Server.Migrations
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SGTitansManager.Models.ChampionPoolItem", b =>
+                {
+                    b.HasOne("SGTitansManager.Models.Champion", "Champion")
+                        .WithMany()
+                        .HasForeignKey("ChampionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SGTitansManager.Models.Player", null)
+                        .WithMany("ChampionPool")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Champion");
                 });
 
             modelBuilder.Entity("SGTitansManager.Models.Member", b =>
@@ -334,20 +420,11 @@ namespace SGTitansManager.Server.Migrations
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.User", b =>
-                {
-                    b.HasOne("SGTitansManager.Models.Member", "Member")
-                        .WithOne()
-                        .HasForeignKey("SGTitansManager.Models.User", "MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Member");
-                });
-
             modelBuilder.Entity("SGTitansManager.Models.Player", b =>
                 {
                     b.Navigation("Availabilities");
+
+                    b.Navigation("ChampionPool");
 
                     b.Navigation("PlayerRanks");
                 });
