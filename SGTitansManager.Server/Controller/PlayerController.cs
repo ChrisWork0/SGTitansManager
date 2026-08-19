@@ -8,7 +8,6 @@ using SGTitansManager.Server.Repositories;
 
 namespace SGTitansManager.Server.Controller;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class PlayerController : ControllerBase
@@ -25,8 +24,8 @@ public class PlayerController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = Policies.AdminOnly)]
-    public async Task<IActionResult> Get([FromQuery] bool withDeleted)
+    [Authorize(Policy = Policies.CoachOnly)]
+    public async Task<IActionResult> Get([FromQuery] bool withDeleted = false)
         => Ok(await _playerRepo.Get(withDeleted));
 
     [HttpGet("{playerId}")]
@@ -73,6 +72,12 @@ public class PlayerController : ControllerBase
     [Authorize(Policy = Policies.AdminOnly)]
     public async Task<IActionResult> Delete(Guid playerId)
     {
+        var user = await _userRepo.GetUserByPlayerId(playerId); 
+        if (user?.Member == null)
+            return NotFound();
+        user.Member.PlayerId = null;
+        user.Member.Player = null;
+        
         var result = await _playerRepo.Delete(playerId);
         if (!result)
             return NotFound();

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SGTitansManager.Server.Database;
@@ -12,9 +13,11 @@ using SGTitansManager.Server.Database;
 namespace SGTitansManager.Server.Migrations
 {
     [DbContext(typeof(ManagerContext))]
-    partial class ManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20260819064947_SetValueComparerForPositionsInPlayer")]
+    partial class SetValueComparerForPositionsInPlayer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -306,7 +309,7 @@ namespace SGTitansManager.Server.Migrations
                     b.ToTable("PlayerRanks");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.AppUser", b =>
+            modelBuilder.Entity("SGTitansManager.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -402,11 +405,11 @@ namespace SGTitansManager.Server.Migrations
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("SGTitansManager.Models.AppUser", b =>
+            modelBuilder.Entity("SGTitansManager.Models.User", b =>
                 {
                     b.HasOne("SGTitansManager.Models.Member", "Member")
                         .WithOne()
-                        .HasForeignKey("SGTitansManager.Models.AppUser", "MemberId")
+                        .HasForeignKey("SGTitansManager.Models.User", "MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

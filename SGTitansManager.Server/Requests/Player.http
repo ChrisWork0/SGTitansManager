@@ -1,5 +1,5 @@
-@playerId = 
-@userId =
+@playerId = 01a018c8-ced0-763b-bf04-ffb6bb694b66
+@userId = 019ffff8-83aa-7524-a40a-f7f49f9583b6
 
 ### GET Players
 GET {{BaseUrl}}/api/Player
@@ -32,7 +32,7 @@ Content-Type: application/json
 Authorization: {{jwt}}
 
 {
-  "gameName": "",
+  "gameName": "SGC Tester#SGC",
   "mainPosition": "Top",
   "core": true,
   "tryout": false,

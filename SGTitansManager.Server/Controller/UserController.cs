@@ -43,7 +43,7 @@ public class UserController : ControllerBase
                                        && userId != Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "userId").Value))
             return Forbid();
         
-        var user = await _userRepo.GetByIdWithIncludes(userId, [nameof(UserDto.Member)]);
+        var user = await _userRepo.GetUserWithMemberAndPlayer(userId);
         if (user == null)
             return NotFound();
         return Ok(new UserDto
@@ -66,7 +66,7 @@ public class UserController : ControllerBase
             MemberSince = createUser.MemberSince
         };
         
-        var user = new User
+        var user = new AppUser
         {
             PasswordHash = createUser.Password.Sha256(),
             UserName = createUser.UserName,
@@ -81,7 +81,7 @@ public class UserController : ControllerBase
 
     [Authorize(Policy = Policies.AdminOnly)]
     [HttpPatch("{userId}")]
-    public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument<User> updates)
+    public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument<AppUser> updates)
     {
         var result = await _userRepo.Patch(userId,  updates);
         if (!result.Success)

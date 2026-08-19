@@ -19,8 +19,8 @@ public class Repository<TModel> where TModel : BaseModel
 
     public virtual async Task<List<TModel>> Get(bool withDeleted = false)
     {
-        if (withDeleted)
-            return await DbSet.Where(m => m.Deleted != null).ToListAsync();
+        if (!withDeleted)
+            return await DbSet.Where(m => m.Deleted == null).ToListAsync();
         return await DbSet.ToListAsync();
     }
 

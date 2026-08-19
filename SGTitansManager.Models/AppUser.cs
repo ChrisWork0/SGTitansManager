@@ -1,6 +1,6 @@
 namespace SGTitansManager.Models;
 
-public class User : BaseModel
+public class AppUser : BaseModel
 {
     public string UserName { get; set; } = "";
     public string PasswordHash { get; set; } = "";
