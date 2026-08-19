@@ -1,4 +1,5 @@
 using System.Numerics;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -43,14 +44,23 @@ public class UserRepository : Repository<AppUser>
                                              && u.PasswordHash == passwordHash 
                                              && u.IsActive);
 
-    public override Task<ResultDto> Patch(Guid id, JsonPatchDocument<AppUser> updates)
+    public override async Task<ResultDto> Patch(Guid id, JsonPatchDocument<AppUser> updates)
     {
         foreach (var operation in updates.Operations)
         {
             if (operation.path == "/passwordHash")
-                operation.value = (operation.value.ToString() 
-                                   ?? throw new InvalidOperationException()).Sha256();
+                return Result.UnSuccess(403, "Forbid");
         }
-        return base.Patch(id, updates);
+        return await base.Patch(id, updates);
+    }
+
+    public async Task<bool> SetPasswordAsync(Guid userId, string newPassword)
+    {
+        var user = await DbSet.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+            return false;
+        user.PasswordHash = newPassword.Sha256();
+        await Save();
+        return true;
     }
 }

@@ -15,10 +15,12 @@ namespace SGTitansManager.Server.Controller;
 public class UserController : ControllerBase
 {
     private readonly UserRepository _userRepo; 
+    private readonly VerificationService _verificationService;
     
-    public UserController(ManagerContext context)
+    public UserController(ManagerContext context, VerificationService verificationService)
     {
         _userRepo = new UserRepository(context);
+        _verificationService = verificationService;
     }
 
     [Authorize(Policy = Policies.AdminOnly)]
@@ -85,9 +87,22 @@ public class UserController : ControllerBase
     [HttpPatch("{userId}")]
     public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument<AppUser> updates)
     {
-        var result = await _userRepo.Patch(userId,  updates);
+        var result = await _userRepo.Patch(userId, updates);
         if (!result.Success)
             return StatusCode(result.StatusCode ?? 500);
         return Ok(result.Model);
+    }
+
+    [Authorize]
+    [HttpPost("password-change/request")]
+    public async Task<IActionResult> RequestPasswordChange(string newPassword)
+    {
+        var userId = Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "userId").Value);
+        var user = await _userRepo.GetByIdWithIncludes(userId, [nameof(AppUser.Member)]);
+        if (user?.Member == null) 
+            return NotFound();
+        if (!await _verificationService.VerifyPasswordChange(user.Member.DiscordUser, userId))
+            return BadRequest();
+        return NoContent();
     }
 }

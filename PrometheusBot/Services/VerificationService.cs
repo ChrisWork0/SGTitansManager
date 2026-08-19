@@ -32,7 +32,7 @@ public class VerificationService
         }
         catch (Exception e)
         {
-            message = $"Failed to open DM-Channel for {discordUserId}";
+            message = $"Failed to open DM-Channel for '{discordUserId}'";
             _logger.LogError(e, message);
             return new ResultDto { Message = message };
         }
