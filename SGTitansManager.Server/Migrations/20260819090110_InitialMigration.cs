@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace SGTitansManager.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class FirstMigration : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,12 +30,48 @@ namespace SGTitansManager.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Champions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Image = table.Column<string>(type: "text", nullable: false),
+                    Tags = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Champions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Histories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Team = table.Column<string>(type: "text", nullable: false),
+                    TeamAbbreviation = table.Column<string>(type: "text", nullable: false),
+                    TeamWins = table.Column<int>(type: "integer", nullable: false),
+                    Opponent = table.Column<string>(type: "text", nullable: false),
+                    OpponentAbbreviation = table.Column<string>(type: "text", nullable: false),
+                    OpponentWins = table.Column<int>(type: "integer", nullable: false),
+                    SidesTeam = table.Column<int[]>(type: "integer[]", nullable: false),
+                    ImageDetails = table.Column<List<string>>(type: "text[]", nullable: false),
+                    Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Deleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Histories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Players",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     GameName = table.Column<string>(type: "text", nullable: false),
-                    Positions = table.Column<string[]>(type: "text[]", nullable: false),
+                    Positions = table.Column<string>(type: "text", nullable: false),
                     MainPosition = table.Column<string>(type: "text", nullable: true),
                     Core = table.Column<bool>(type: "boolean", nullable: false),
                     CorePlayerImage = table.Column<string>(type: "text", nullable: false),
@@ -77,15 +115,38 @@ namespace SGTitansManager.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ChampionPoolItem",
+                columns: table => new
+                {
+                    ChampionId = table.Column<int>(type: "integer", nullable: false),
+                    PlayerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SkillLevel = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChampionPoolItem", x => new { x.ChampionId, x.PlayerId });
+                    table.ForeignKey(
+                        name: "FK_ChampionPoolItem_Champions_ChampionId",
+                        column: x => x.ChampionId,
+                        principalTable: "Champions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChampionPoolItem_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Members",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    DiscordName = table.Column<string>(type: "text", nullable: false),
+                    DiscordUser = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     MemberSince = table.Column<DateOnly>(type: "date", nullable: false),
-                    PlayerId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Deleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    PlayerId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -129,7 +190,6 @@ namespace SGTitansManager.Server.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserName = table.Column<string>(type: "text", nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
-                    LoggedIn = table.Column<bool>(type: "boolean", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     Role = table.Column<int>(type: "integer", nullable: false),
                     MemberId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -147,10 +207,31 @@ namespace SGTitansManager.Server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Members",
+                columns: new[] { "Id", "DiscordUser", "MemberSince", "PlayerId" },
+                values: new object[] { new Guid("00000000-0000-0000-0000-000000000001"), "00000000000000000000", new DateOnly(2026, 8, 14), null });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Created", "Deleted", "IsActive", "MemberId", "PasswordHash", "Role", "UserName" },
+                values: new object[] { new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, new Guid("00000000-0000-0000-0000-000000000001"), "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=", 0, "admin" });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Availabilities_PlayerId",
                 table: "Availabilities",
                 column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChampionPoolItem_PlayerId",
+                table: "ChampionPoolItem",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Members_DiscordUser",
+                table: "Members",
+                column: "DiscordUser",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Members_PlayerId",
@@ -180,10 +261,19 @@ namespace SGTitansManager.Server.Migrations
                 name: "Availabilities");
 
             migrationBuilder.DropTable(
+                name: "ChampionPoolItem");
+
+            migrationBuilder.DropTable(
+                name: "Histories");
+
+            migrationBuilder.DropTable(
                 name: "PlayerRanks");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Champions");
 
             migrationBuilder.DropTable(
                 name: "Members");

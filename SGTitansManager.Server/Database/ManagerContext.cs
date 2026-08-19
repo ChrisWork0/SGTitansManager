@@ -163,15 +163,25 @@ public class ManagerContext : DbContext
                 .HasConversion<UtcToLocalDateTimeConverter>();
         });
         
+        // Set DiscordUser Unique
+        
+        modelBuilder.Entity<Member>()
+            .Property(p => p.DiscordUser)
+            .IsRequired()
+            .HasMaxLength(20);
+        
+        modelBuilder.Entity<Member>()
+            .HasIndex(p => p.DiscordUser)
+            .IsUnique();
+        
         // Default Data
         
         modelBuilder.Entity<Member>()
-            .HasData(new
+            .HasData(new Member
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                DiscordName = "Admin",
+                DiscordUser = "00000000000000000000",
                 MemberSince = new DateOnly(2026, 8, 14),
-                Created = DateTime.MinValue
             });
         
         modelBuilder.Entity<AppUser>()

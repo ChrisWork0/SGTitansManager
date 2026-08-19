@@ -60,9 +60,11 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] CreateUserDto createUser)
     {
+        if (createUser.DiscordId.Length < 17)
+            return BadRequest("No valid Discord ID");
         var member = new Member
         {
-            DiscordName = createUser.DiscordName,
+            DiscordUser = createUser.DiscordId,
             MemberSince = createUser.MemberSince
         };
         
