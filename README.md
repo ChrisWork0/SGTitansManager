@@ -1,184 +1,70 @@
-# Application Structure & Models
+# ⚔️ SGTitansManager
 
-## General UI Structure
-
-The application should be designed with a **scalable and modular UI structure** to support the easy integration of new pages and features.
-
-### Requirements
-
-* Login decides what pages will be shown
-* After Login Member or Player will be created
-* **Must be scalable for new pages**
-* Use a **single main window** as the application shell
-* Pages are displayed within the main window
-* A **Dashboard** should be used as **MainPage**
-* Navigation between pages is handled through:
-
-  * `Buttons`
-  * `DockMenu`
-  * or a similar navigation component
-* The main window should remain persistent while switching between pages
-
-### Navigation Flow
-
-```text
-Login Window
-│
-Main Window (Dashboard)
-│
-├── Navigation
-│   ├── Tryouts
-│   ├── Member Management
-│   ├── Availability
-|   ├── Appointments
-|   └── Histories
-│
-└── Page Content
-    └── Currently selected page
-```
+**SGTitansManager** ist eine modulare All-in-One-Lösung zur Verwaltung von Teams, Spielern, Coaches, Castern und Organisatoren im Rahmen des **SGTitans**-Projekts. Die Architektur umfasst ein zentrales ASP.NET Core Backend, eine WPF-Desktop-Anwendung für Administratoren, einen Discord-Bot für Automatisierungen und Integrations-Tools.
 
 ---
 
-# Pages
+## 🛠️ Repository-Übersicht
 
-The application should initially provide the following pages:
+Das Repository teilt sich in folgende Teilprojekte auf:
 
-## Tryouts
-
-Page for managing and tracking player tryouts.
-
-Potential functionality:
-
-* View current tryouts
-* Add new tryouts
-* Manage tryout status
-* View player information
-* Schedule tryout appointments
-
-## Member Management
-
-Page for managing all members of the organization.
-
-Potential functionality:
-
-* View members
-* Add new members
-* Edit member information
-* Assign roles
-* Manage player-specific information
-
-## Availabilities
-
-Page for managing availabilities
-
-Potential functionality:
-
-* View availability
-* Create availability
-* Edit availability
-* Delete availability
-* Filter availability after Date
-
-## Appointments
-
-Page for managing appointments and events.
-
-Potential functionality:
-
-* View appointments
-* Create appointments
-* Edit appointments
-* Delete appointments
-* Filter appointments by type
-
-## Histories
-
-Page for documentate previous games
-
-Potential functionality:
-
-* View games
-* Create games
-* Edit games
-* Delete games
-* Filter games
+| Projekt | Beschreibung | Typ |
+| :--- | :--- | :--- |
+| **`SGTitansManager.Server`** | Das zentrale Backend & Gehirn des gesamten Systems. | ASP.NET Core Backend |
+| **`SGTitansManager.Wpf`** | Administrative Benutzeroberfläche zur Steuerung des Backends. | WPF Desktop-App |
+| **`SGTitansManager.Models`** | Gemeinsam genutzte Datenmodelle für Backend und Client-Komponenten. | class library |
+| **`PrometheusBot`** | Discord-Bot zur Automatisierung und Interaktion mit Mitgliedern. | Discord Bot |
+| **`ChampionImporter`** | CLI-Tool zum Importieren von League of Legends Champion-Daten. | Console Utility |
 
 ---
 
-# Models
+## 🏛️ System-Komponenten
 
-The application consists of the following core models and enums:
+### 🧠 SGTitansManager.Server
+Das Herzstück des Systems. Bietet APIs und Logik für die Verwaltung von:
+- **Nutzern** & Authentifizierung
+- **Spielern** (Player Data & Rosters)
+- **Coaches** & **Castern**
+- **Organisatoren** & Event-Management
 
-```text
-User
-Member
-Availability
-Player
-PlayerRank
-Appointment
-History
-```
+### 🖥️ SGTitansManager.Wpf
+Die grafische Desktop-Oberfläche für Verwalter und Admins. Sie greift direkt auf die Schnittstellen von `SGTitansManager.Server` zu.
 
-Additional enums and supporting models:
-
-```text
-Position
-RankType
-Rank
-AppointmentType
-Side
-```
+### 📦 SGTitansManager.Models
+Enthält alle zentral definierten Datenmodelle und Entities, die im ASP.NET Core Backend sowie in verbundenen Services verwendet werden.
 
 ---
 
-# Overall Structure
+## 🤖 PrometheusBot
 
-```text
-Application with Login
-│
-├── Main Window
-│   │
-│   ├── Navigation
-│   │   ├── Tryouts
-│   │   ├── Member Management
-│   │   ├── Availabilities
-│   │   ├── Appointments
-│   │   └── Histories
-│   │
-│   └── Page Content
-│
-├── Models : BaseModel
-│   │
-│   ├── User
-│   ├── Member
-│   │   └── Player
-│   │       ├── Availabilities
-│   │       └── PlayerRanks
-│   │
-│   ├── Histories
-│   └── Appointments
-│
-└── Enums
-    ├── Role
-    ├── Position
-    ├── RankType
-    ├── Rank
-    ├── AppointmentType
-    └── Side
-```
+Der offizielle Discord-Bot des **SGTitans** Discord-Servers.
 
-# Design Principles
+### Funktionen:
+* **Slash Commands:**
+    * `Ping` / `Echo` – Verbindungstests
+    * **Student Management** *(Nur für Coaches & Admins)*: Rollenverwaltung und Erstellung von Teilnahmelisten
+    * *Weitere Commands in Entwicklung...*
+* **Passwort-Wiederherstellung:** Verifizierungs-Workflow über direkte Nutzer-DMs.
 
-* The UI must be **scalable for additional pages**.
-* Unique Login for specified users.
-* The application should use a **single main window**.
-* Navigation should be centralized and consistent.
-* `Member` is the base class for general members.
-* A `Member` can have **multiple roles**.
-* A `Member` can have one `Player`.
-* A `Player` can have **multiple positions**.
-* A `Player` can have **multiple ranks**, depending on the `RankType`.
-* Player-specific information should only be stored in `Player`.
-* General member information should remain in `Member`.
-* Enums should be used for fixed sets of values.
-* Collections should be used where multiple values are possible.
+---
+
+## 📥 ChampionImporter
+
+Ein Utility-Tool zum Einlesen von *League of Legends* Champion-Daten aus der Data Dragon API des Riot Games Developer Portals in die PostgreSQL-Datenbank des Backends.
+
+### Anleitung / How to use
+
+1. **Lade die aktuelle `champion.json` herunter:**
+   Beispiel (Version 16.16.1):  
+   `https://ddragon.leagueoflegends.com/cdn/16.16.1/data/en_US/champion.json`
+
+2. **Datei ablegen:**
+   Platziere die heruntergeladene Datei im Ordner `Data/` des Projekts `ChampionImporter`.
+
+3. **Build-Einstellungen anpassen:**
+   Stelle in deinen IDE-Eigenschaften für die Datei `champion.json` die Option **"Copy to Output Directory"** auf **`Copy Always`** (Immer kopieren).
+
+4. **Importer ausführen:**
+   Starte den Importer (für Testläufe empfiehlt sich die Umgebungsvariable `ASPNETCORE_ENVIRONMENT=Development`).
+
+> **Hinweis:** Der Importer ist idempotent. Ist ein Champion bereits in der PostgreSQL-Datenbank vorhanden, wird er automatisch übersprungen (*skipped*).
