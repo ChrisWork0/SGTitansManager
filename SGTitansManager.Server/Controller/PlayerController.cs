@@ -83,4 +83,37 @@ public class PlayerController : ControllerBase
             return NotFound();
         return NoContent();
     }
+
+    [HttpPut("{playerId}")]
+    [Authorize(Policy = Policies.AdminOnly)]
+    public async Task<IActionResult> RestorePlayer(Guid playerId, [FromQuery] Guid toUser)
+    {
+        var player = await _playerRepo.GetByIdWithIncludes(playerId);
+        var user = await _userRepo.GetByIdWithIncludes(toUser, [nameof(UserDto.Member)]);
+        if (player == null || user?.Member == null)
+            return NotFound();
+        if (player.Deleted != null)
+        {
+            player.Deleted = null;
+            user.Member.PlayerId = player.Id;
+            user.Member.Player = player;
+
+            await _playerRepo.Save();
+            await _userRepo.Save();
+
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                IsActive = user.IsActive,
+                Role = user.Role,
+                Member = user.Member,
+                UserName = user.UserName,
+            };
+
+            return Ok(userDto);
+        }
+
+        return BadRequest("Player not deleted.");
+
+    }
 }

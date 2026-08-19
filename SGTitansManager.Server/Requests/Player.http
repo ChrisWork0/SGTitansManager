@@ -70,3 +70,15 @@ Authorization: {{jwt}}
         client.assert(response.status === 204, "Response status is not 204");
     })
 %}
+
+### Restore Player
+PUT {{BaseUrl}}/api/Player/{{playerId}}?toUser={{userId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: {{jwt}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+%}
