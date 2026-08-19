@@ -1,0 +1,10 @@
+### Sends verification request to user's DM
+POST {{BaseUrl}}/internal/Verification/send
+Accept: application/json
+Content-Type: application/json
+X-Internal-Api-Key: {{ApiKey}}
+
+{
+  "discordId": "1025579600794894386",
+  "tokenId": "6a75e1cd-c7ba-4f02-9dd0-c80adbcbc743"
+}

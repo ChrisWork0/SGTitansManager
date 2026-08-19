@@ -8,6 +8,7 @@ public class AppUser : BaseModel
     public Role Role { get; set; }
     public Guid MemberId { get; set; }
     public Member? Member { get; set; }
+    public string? RecoveryCode { get; set; }
 }
 
 public enum Role

@@ -15,10 +15,12 @@ namespace SGTitansManager.Server.Controller;
 public class UserController : ControllerBase
 {
     private readonly UserRepository _userRepo; 
+    private readonly UserService _userService;
     
-    public UserController(ManagerContext context)
+    public UserController(ManagerContext context, UserService userService)
     {
         _userRepo = new UserRepository(context);
+        _userService = userService;
     }
 
     [Authorize(Policy = Policies.AdminOnly)]
@@ -60,8 +62,8 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] CreateUserDto createUser)
     {
-        if (createUser.DiscordId.Length < 17)
-            return BadRequest("No valid Discord ID");
+        if (!ulong.TryParse(createUser.DiscordId, out var discordId))
+            return BadRequest("Unvalid Discord ID");
         var member = new Member
         {
             DiscordUser = createUser.DiscordId,
@@ -85,9 +87,35 @@ public class UserController : ControllerBase
     [HttpPatch("{userId}")]
     public async Task<IActionResult> Patch(Guid userId, JsonPatchDocument<AppUser> updates)
     {
-        var result = await _userRepo.Patch(userId,  updates);
+        var result = await _userRepo.Patch(userId, updates);
         if (!result.Success)
             return StatusCode(result.StatusCode ?? 500);
         return Ok(result.Model);
+    }
+
+    [Authorize(Policy = Policies.AdminOnly)]
+    [HttpPut("set/recovery-code/{userId}")]
+    public async Task<IActionResult> SetRecoveryCode(Guid userId)
+    {
+        var user = await _userRepo.GetByIdWithIncludes(userId);
+        if (user == null)
+            return NotFound();
+        var code = _userService.CreateRecoveryCode();
+        user.RecoveryCode = code;
+        await _userRepo.Save();
+        return Ok($"RecoveryCode for '{user.UserName}': {code}");
+    }
+
+    [AllowAnonymous]
+    [HttpPost("password-change/request")]
+    public async Task<IActionResult> RequestPasswordChange(PasswordRecovery passwordRecoveryDto)
+    {
+        var user = await _userRepo.GetUserByRecoveryCode(passwordRecoveryDto.RecoveryCode);
+        if (user?.Member == null) 
+            return NotFound();
+        if (!await _userService.VerifyPasswordChange(user.Member.DiscordUser, user.Id))
+            return NoContent();
+        await _userRepo.SetPasswordAsync(user.Id, passwordRecoveryDto.NewPassword);
+        return Ok("Password changed");
     }
 }

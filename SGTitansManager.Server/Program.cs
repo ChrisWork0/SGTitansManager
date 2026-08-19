@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -19,7 +20,10 @@ public class Program
     private static void CreateWebApplication(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
+        var config = builder.Configuration;
+        var connectionString = config.GetConnectionString("DefaultConnectionString");
+        var botUrl = config.GetSection("DiscordBot").GetSection("BotUrl").Value ?? throw new ArgumentNullException();
+        var internalApiKey = config.GetSection("DiscordBot").GetSection("ApiKey").Value ?? throw new ArgumentNullException();
         
         if (string.IsNullOrEmpty(connectionString))
             throw new InvalidOperationException("Please set connection string in appsettings.json");
@@ -33,6 +37,22 @@ public class Program
             options.UseNpgsql(connectionString));
 
         builder.Services.AddScoped<AuthorizationService>();
+        builder.Services.AddScoped<UserService>();
+        
+        builder.Services.AddHttpClient("PrometheusBot", client =>
+        {
+            client.BaseAddress = new Uri(botUrl);
+            client.DefaultRequestHeaders.Add("X-Internal-Api-Key", internalApiKey);
+        });
+
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.AddFixedWindowLimiter("PasswordChange", opt =>
+            {
+                opt.PermitLimit = 3;
+                opt.Window = TimeSpan.FromMinutes(10);
+            });
+        });
         
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy(Policies.AdminOnly, p =>
