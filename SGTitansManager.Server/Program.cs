@@ -37,7 +37,7 @@ public class Program
             options.UseNpgsql(connectionString));
 
         builder.Services.AddScoped<AuthorizationService>();
-        builder.Services.AddScoped<VerificationService>();
+        builder.Services.AddScoped<UserService>();
         
         builder.Services.AddHttpClient("PrometheusBot", client =>
         {

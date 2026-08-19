@@ -60,7 +60,19 @@ public class UserRepository : Repository<AppUser>
         if (user == null)
             return false;
         user.PasswordHash = newPassword.Sha256();
+        user.RecoveryCode = null;
         await Save();
         return true;
     }
+
+    public async Task<AppUser?> GetUserByRecoveryCode(string recoveryCode)
+    {
+        var user = await DbSet.Include(u => u.Member)
+            .FirstOrDefaultAsync(u => u.RecoveryCode == recoveryCode);
+        if (user == null)
+            return null;
+        return user;
+    }
+        
+    
 }

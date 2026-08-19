@@ -15,12 +15,12 @@ namespace SGTitansManager.Server.Controller;
 public class UserController : ControllerBase
 {
     private readonly UserRepository _userRepo; 
-    private readonly VerificationService _verificationService;
+    private readonly UserService _userService;
     
-    public UserController(ManagerContext context, VerificationService verificationService)
+    public UserController(ManagerContext context, UserService userService)
     {
         _userRepo = new UserRepository(context);
-        _verificationService = verificationService;
+        _userService = userService;
     }
 
     [Authorize(Policy = Policies.AdminOnly)]
@@ -93,16 +93,29 @@ public class UserController : ControllerBase
         return Ok(result.Model);
     }
 
-    [Authorize]
-    [HttpPost("password-change/request")]
-    public async Task<IActionResult> RequestPasswordChange(string newPassword)
+    [Authorize(Policy = Policies.AdminOnly)]
+    [HttpPut("set/recovery-code/{userId}")]
+    public async Task<IActionResult> SetRecoveryCode(Guid userId)
     {
-        var userId = Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "userId").Value);
-        var user = await _userRepo.GetByIdWithIncludes(userId, [nameof(AppUser.Member)]);
+        var user = await _userRepo.GetByIdWithIncludes(userId);
+        if (user == null)
+            return NotFound();
+        var code = _userService.CreateRecoveryCode();
+        user.RecoveryCode = code;
+        await _userRepo.Save();
+        return Ok($"RecoveryCode for '{user.UserName}': {code}");
+    }
+
+    [AllowAnonymous]
+    [HttpPost("password-change/request")]
+    public async Task<IActionResult> RequestPasswordChange(PasswordRecovery passwordRecoveryDto)
+    {
+        var user = await _userRepo.GetUserByRecoveryCode(passwordRecoveryDto.RecoveryCode);
         if (user?.Member == null) 
             return NotFound();
-        if (!await _verificationService.VerifyPasswordChange(user.Member.DiscordUser, userId))
-            return BadRequest();
-        return NoContent();
+        if (!await _userService.VerifyPasswordChange(user.Member.DiscordUser, user.Id))
+            return NoContent();
+        await _userRepo.SetPasswordAsync(user.Id, passwordRecoveryDto.NewPassword);
+        return Ok("Password changed");
     }
 }

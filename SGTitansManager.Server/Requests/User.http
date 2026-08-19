@@ -1,4 +1,5 @@
-@userId = 019ffff8-83aa-7524-a40a-f7f49f9583b6
+@userId = 01a01ac7-ba5a-7f9a-a53b-c1a13928c16d
+@newPassword = test
 
 ### GET Users
 GET {{BaseUrl}}/api/User
@@ -51,15 +52,44 @@ Accept: application/json
 Authorization: {{jwt}}
 
 {
-  "userName": "test",
+  "userName": "SGC Trafy",
   "password": "test",
   "memberSince": "2026-08-14",
-  "discordId": "00000000000000000001",
-  "role": 4
+  "discordId": "1025579600794894386",
+  "role": 0
 }
 
 > {%
     client.test("Request executed successfully", function () {
         client.assert(response.status === 204, "Response status is not 204");
+    })
+%}
+
+### Set Recovery Code
+PUT {{BaseUrl}}/api/User/set/recovery-code/{{userId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+%}
+
+### Change Password
+POST {{BaseUrl}}/api/User/password-change/request
+Content-Type: application/json
+Accept: application/json
+
+{
+  "newPassword": "test",
+  "recoveryCode": "2135784240"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200" 
+            || response.status === 204, "Response status is not 204");
     })
 %}
