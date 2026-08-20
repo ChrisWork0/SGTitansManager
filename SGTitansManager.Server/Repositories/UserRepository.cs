@@ -40,7 +40,7 @@ public class UserRepository : Repository<AppUser>
     }
     
     public async Task<AppUser?> LoginByUserName(string username, string passwordHash) =>
-        await DbSet.FirstOrDefaultAsync(u => u.UserName == username 
+        await DbSet.Include(u => u.Member).FirstOrDefaultAsync(u => u.UserName == username 
                                              && u.PasswordHash == passwordHash 
                                              && u.IsActive);
 

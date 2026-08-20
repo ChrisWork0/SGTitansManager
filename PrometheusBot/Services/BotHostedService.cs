@@ -105,7 +105,7 @@ public class BotHostedService : IHostedService
         var message = !resolved
             ? "⚠️ Request already expired."
             : confirmed
-                ? "✅ Confirmed. New password set."
+                ? "✅ Confirmed."
                 : "❌ Denied.";
         
         await button.SendResponseAsync(InteractionCallback.ModifyMessage(msg =>
