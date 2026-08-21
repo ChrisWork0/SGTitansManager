@@ -1,4 +1,4 @@
-﻿namespace SGTitansManager.Server;
+﻿namespace SGTitansManager.Server.Dtos;
 
 public class PasswordRecovery
 {

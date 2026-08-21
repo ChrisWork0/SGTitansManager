@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
 using PrometheusBot.Dtos;
