@@ -26,6 +26,7 @@ Das Herzstück des Systems. Bietet APIs und Logik für die Verwaltung von:
 - **Spielern** (Player Data & Rosters)
 - **Coaches** & **Castern**
 - **Organisatoren** & Event-Management
+> **Hinweis:** `JWT-Secret` muss aus Sicherheitsgründen über `user-secrets` lokal gesetzt werden.
 
 ### 🖥️ SGTitansManager.Wpf
 Die grafische Desktop-Oberfläche für Verwalter und Admins. Sie greift direkt auf die Schnittstellen von `SGTitansManager.Server` zu.
@@ -45,7 +46,7 @@ Der offizielle Discord-Bot des **SGTitans** Discord-Servers.
     * **Student Management** *(Nur für Coaches & Admins)*: Rollenverwaltung und Erstellung von Teilnahmelisten
     * *Weitere Commands in Entwicklung...*
 * **Passwort-Wiederherstellung:** Verifizierungs-Workflow über direkte Nutzer-DMs.
-
+> **Hinweis:** `BotToken` muss aus Sicherheitsgründen über `user-secrets` lokal gesetzt werden.
 ---
 
 ## 📥 ChampionImporter

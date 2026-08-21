@@ -15,7 +15,7 @@ public class AuthorizationService
     
     public AuthorizationService(IConfiguration config)
     {
-        _jwtSecret = config.GetSection("JwtSettings").GetSection("JwtSecret").Value ?? throw new ArgumentNullException();
+        _jwtSecret = config["JwtSettings:JwtSecret"] ?? throw new ArgumentNullException();
         _issuer =  config.GetSection("JwtSettings").GetSection("JwtIssuer").Value ?? throw new ArgumentNullException();
         _expirationDays = Convert.ToInt32(config.GetSection("JwtSettings").GetSection("JwtExpiresDays").Value);
     }
