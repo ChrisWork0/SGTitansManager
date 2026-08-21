@@ -1,3 +1,5 @@
+using SGTitansManager.Server.Dtos;
+
 namespace SGTitansManager.Server.Helper;
 
 public static class Result

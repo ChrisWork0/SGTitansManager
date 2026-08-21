@@ -2,34 +2,35 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using SGTitansManager.Models;
 using SGTitansManager.Server.Database;
+using SGTitansManager.Server.Dtos;
 using SGTitansManager.Server.Helper;
 
 namespace SGTitansManager.Server.Repositories;
 
 public class Repository<TModel> where TModel : BaseModel
 {
-    protected readonly ManagerContext _dbContext;
-    protected readonly DbSet<TModel> DbSet;
-    
-    public Repository(ManagerContext dbContext)
+    private readonly ManagerContext _dbContext;
+    private readonly DbSet<TModel> _dbSet;
+
+    protected Repository(ManagerContext dbContext)
     {
         _dbContext = dbContext;
-        DbSet = _dbContext.Set<TModel>();
+        _dbSet = _dbContext.Set<TModel>();
     }
 
     public virtual async Task<List<TModel>> Get(bool withDeleted = false)
     {
         if (!withDeleted)
-            return await DbSet.Where(m => m.Deleted == null).ToListAsync();
-        return await DbSet.ToListAsync();
+            return await _dbSet.Where(m => m.Deleted == null).ToListAsync();
+        return await _dbSet.ToListAsync();
     }
 
     private async Task<TModel?> GetById(Guid id) 
-        => await DbSet.FirstOrDefaultAsync(m => m.Id == id);
+        => await _dbSet.FirstOrDefaultAsync(m => m.Id == id);
     
     public virtual async Task<TModel?> GetByIdWithIncludes(Guid id, string[]? includes = null)
     {
-        IQueryable<TModel> set = DbSet;
+        IQueryable<TModel> set = _dbSet;
         if (includes == null)
             return await GetById(id);
         foreach (var include in includes)
@@ -43,21 +44,21 @@ public class Repository<TModel> where TModel : BaseModel
 
     public virtual TModel Add(TModel model)
     {
-        DbSet.Add(model);
+        _dbSet.Add(model);
         return model;
     }
 
     public virtual void AddList(List<TModel> models)
-        => DbSet.AddRange(models);
+        => _dbSet.AddRange(models);
     
     public virtual async Task AddAndSave(TModel model)
     {
-        await DbSet.AddAsync(model);
+        await _dbSet.AddAsync(model);
         await _dbContext.SaveChangesAsync();
     }
 
     public virtual async Task<int> Count()
-        => await DbSet.CountAsync();
+        => await _dbSet.CountAsync();
 
     public virtual async Task<ResultDto> Patch(Guid id, JsonPatchDocument<TModel> updates)
     {
@@ -93,7 +94,7 @@ public class Repository<TModel> where TModel : BaseModel
         var model = await GetById(id);
         if (model == null)
             return false;
-        DbSet.Remove(model);
+        _dbSet.Remove(model);
         await _dbContext.SaveChangesAsync();
         return true;
     }

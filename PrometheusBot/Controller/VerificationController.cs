@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using NetCord;
-using NetCord.Gateway;
 using PrometheusBot.Dtos;
 using PrometheusBot.Services;
 

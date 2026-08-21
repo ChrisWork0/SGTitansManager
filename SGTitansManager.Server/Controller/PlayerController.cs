@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SGTitansManager.Models;
 using SGTitansManager.Models.Dtos;
 using SGTitansManager.Server.Database;
+using SGTitansManager.Server.Dtos;
 using SGTitansManager.Server.Repositories;
 
 namespace SGTitansManager.Server.Controller;

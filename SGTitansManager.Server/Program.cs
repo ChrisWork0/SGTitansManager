@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using SGTitansManager.Models;
 using SGTitansManager.Server.Database;
+using SGTitansManager.Server.Dtos;
 using SGTitansManager.Server.Services;
 
 namespace SGTitansManager.Server;

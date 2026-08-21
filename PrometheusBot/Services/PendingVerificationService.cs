@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using NetCord.Services.ApplicationCommands;
 
 namespace PrometheusBot.Services;
 
