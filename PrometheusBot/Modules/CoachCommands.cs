@@ -36,29 +36,34 @@ public class CoachCommands : ApplicationCommandModule<SlashCommandContext>
         while (true)
         {
             if (guild == null) { 
-                message = "Something went wrong :(";
+                message = "Something went wrong! :x:";
                 break;
             }
             user = guild.Users.First(u => u.Key == selectedUser.Id).Value;
             if (user == null) {
-                message = "User not found :(";
+                message = "User not found! :x:";
+                break;
+            }
+
+            if (user.RoleIds.Contains(_studentRoleId)) {
+                message = "User is already a student! :warning:";
                 break;
             }
 
             if (!guild.Roles.ContainsKey(_studentRoleId)) 
-                message = "Role not found :(";
+                message = "Role not found! :x:";
             
             break;
         }
         
         if (!string.IsNullOrEmpty(message))
-            embed = EmbedHelper.InfoEmbed(_title, message, GetAvatarUrls(guild));
+            embed = EmbedHelper.CreateEmbed(CreateContent(_title, message, [], null));
         
         else
         {
             await user.AddRoleAsync(_studentRoleId);
-            message = $"<@{user.Id}> successfully added to <@&{_studentRoleId}>.";
-            embed = EmbedHelper.InfoEmbed(_title, message, GetAvatarUrls(guild));
+            message = $"<@{user.Id}> successfully added to <@&{_studentRoleId}>! :white_check_mark:";
+            embed = EmbedHelper.CreateEmbed(CreateContent(_title, message, [], null));
         }
         
         return InteractionCallback.Message(new InteractionMessageProperties(){ Embeds = [embed], Flags = MessageFlags.Ephemeral});
@@ -78,34 +83,34 @@ public class CoachCommands : ApplicationCommandModule<SlashCommandContext>
         while (true)
         {
             if (guild == null) {
-                message = "Something went wrong :(";
+                message = "Something went wrong! :x:";
                 break;
             }
 
             user = guild.Users.First(u => u.Key == selectedUser.Id).Value;
             if (user == null) {
-                message = "User not found :(";
+                message = "User not found! :x:";
                 break;
             }
 
             if (!guild.Roles.ContainsKey(_studentRoleId)) {
-                message = "Role not found :(";
+                message = "Role not found! :x:";
                 break;
             }
 
             if (!user.RoleIds.Contains(_studentRoleId))
-                message = "User is no student.";
+                message = "User is no student! :x:";
             
             break;
         }
         
         if (!string.IsNullOrEmpty(message))
-            embed = EmbedHelper.InfoEmbed(_title, message, GetAvatarUrls(guild));
+            embed = EmbedHelper.CreateEmbed(CreateContent(_title, message, [], null));
         else
         {
             await user.RemoveRoleAsync(_studentRoleId);
-            message = $"<@{user.Id}> successfully removed from <@&{_studentRoleId}>.";
-            embed = EmbedHelper.InfoEmbed(_title, message, GetAvatarUrls(guild));
+            message = $"<@{user.Id}> successfully removed from <@&{_studentRoleId}>! :white_check_mark:";
+            embed = EmbedHelper.CreateEmbed(CreateContent(_title, message, [], null));
         }
         return InteractionCallback.Message(new InteractionMessageProperties(){ Embeds = [embed], Flags = MessageFlags.Ephemeral});
     }
@@ -122,7 +127,7 @@ public class CoachCommands : ApplicationCommandModule<SlashCommandContext>
         List<GuildUser> allUsers = guild.Users.Values.ToList();
         var students = allUsers.Where(u => u.RoleIds.Contains(_studentRoleId)).ToList();
         message = ListAllStudents(students);
-        var embed = EmbedHelper.CreateStudentEmbed(message, GetAvatarUrls(guild));
+        var embed = EmbedHelper.CreateEmbed(CreateContent(null, null, [new EmbedFieldProperties{Name = "Your students:", Value = message}], GetImageUrls(guild)));
         return InteractionCallback.Message(new InteractionMessageProperties(){ Embeds = [embed], Flags = MessageFlags.Ephemeral});
     }
 
@@ -138,12 +143,13 @@ public class CoachCommands : ApplicationCommandModule<SlashCommandContext>
         return message;
     }
 
-    private AvatarUrl GetAvatarUrls(Guild guild)
+    private ImageUrls GetImageUrls(Guild guild)
         => new()
         {
             Bot = GetAvatarUrl(guild.Users.Values.First(u => u.Id == _bot)),
             Creator = GetAvatarUrl(guild.Users.Values.First(u => u.Id == _creator)),
-            User = GetAvatarUrl((GuildUser)Context.User)
+            User = GetAvatarUrl((GuildUser)Context.User),
+            Image = "https://www.gaming-grounds.de/wp-content/uploads/2019/09/league-newlogo-banner_babt.jpg"
         };
     
 
@@ -156,4 +162,17 @@ public class CoachCommands : ApplicationCommandModule<SlashCommandContext>
             return "";
         return url.ToString();
     }
+
+    private EmbedContent CreateContent(string? title, string? message, List<EmbedFieldProperties> output, ImageUrls? imageUrls)
+        => new()
+        {
+            AuthorName = "Prometheus",
+            AuthorIcon = imageUrls?.Bot,
+            Title = title ?? "List of students",
+            Description = message ?? "Shows list of all students on this discord.",
+            ThumbnailUrl = imageUrls?.User,
+            FooterIcon = imageUrls?.Creator,
+            ImageUrl = imageUrls?.Image,
+            Fields = output
+        };
 }

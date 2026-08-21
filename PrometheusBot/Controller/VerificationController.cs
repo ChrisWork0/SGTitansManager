@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using NetCord;
 using NetCord.Gateway;
 using PrometheusBot.Dtos;
 using PrometheusBot.Services;
@@ -24,9 +25,9 @@ public class VerificationController : ControllerBase
     {
         if (!ulong.TryParse(request.DiscordId, out var discordUserId))
             return BadRequest("Unvalid Discord ID");
-        var content = new VerificationContent();
+        var content = new EmbedContent();
         content.Title = $"Passwortänderung bei **'{_applicationName}'**";
-        content.Message = "\n\nWillst du wirklich dein Passwort ändern? 🔑\n\n" +
+        content.Description = "\n\nWillst du wirklich dein Passwort ändern? 🔑\n\n" +
                           "*Diese Anfrage läuft in 5 Minuten ab. ⏱️*";
         var result = await _verificationService.SendVerificationRequestAsync(discordUserId, request.TokenId, 
             cancellationToken, content);
@@ -40,9 +41,9 @@ public class VerificationController : ControllerBase
     {
         if (!ulong.TryParse(request.DiscordId, out var discordUserId))
             return BadRequest("Unvalid Discord ID");
-        var content = new VerificationContent();
+        var content = new EmbedContent();
         content.Title = $"Login bei **'{_applicationName}'**";
-        content.Message = "\n\nWillst du dich gerade wirklich einloggen? 🔑\n\n" +
+        content.Description = "\n\nWillst du dich gerade wirklich einloggen? 🔑\n\n" +
                          "**⚠️ Wenn nicht, dann versuche bitte dein Passwort zu ändern! ⚠️**\n\n" +
                          "*Diese Anfrage läuft in 5 Minuten ab. ⏱️*";
         var result = await _verificationService.SendVerificationRequestAsync(discordUserId, request.TokenId,

@@ -12,7 +12,7 @@ public class VerificationService(
     ILogger<VerificationService> logger)
 {
     public async Task<ResultDto> SendVerificationRequestAsync(ulong discordUserId, Guid tokenId, CancellationToken stoppingToken,
-    VerificationContent content)
+    EmbedContent content)
     {
         string message = "";
         DMChannel dmChannel;
@@ -29,7 +29,7 @@ public class VerificationService(
         
         await dmChannel.SendMessageAsync(new MessageProperties
         {
-            Embeds = [EmbedHelper.InfoEmbed(content.Title, content.Message)],
+            Embeds = [EmbedHelper.CreateEmbed(content)],
             Components =
             [
                 new ActionRowProperties
