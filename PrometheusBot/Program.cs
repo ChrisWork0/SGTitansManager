@@ -14,7 +14,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var config = builder.Configuration;
         
-        var token = config.GetSection("Application").GetSection("BotToken").Value
+        var token = config["Application:BotToken"]
             ?? throw new InvalidOperationException("Bot token not configured");
         var internalApiKey = config.GetSection("Application").GetSection("ApiKey").Value
             ?? throw new InvalidOperationException("API key not configured");

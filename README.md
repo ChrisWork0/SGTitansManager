@@ -46,6 +46,7 @@ Der offizielle Discord-Bot des **SGTitans** Discord-Servers.
     * *Weitere Commands in Entwicklung...*
 * **Passwort-Wiederherstellung:** Verifizierungs-Workflow über direkte Nutzer-DMs.
 
+> **Hinweis:** BotToken muss aus Sicherheitsgründen über `user-secrets` lokal gesetzt werden.
 ---
 
 ## 📥 ChampionImporter
