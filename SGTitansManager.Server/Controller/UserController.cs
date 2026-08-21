@@ -15,19 +15,19 @@ namespace SGTitansManager.Server.Controller;
 public class UserController : ControllerBase
 {
     private readonly UserRepository _userRepo; 
-    private readonly UserService _userService;
+    private readonly VerificationService _verificationService;
     
-    public UserController(ManagerContext context, UserService userService)
+    public UserController(ManagerContext context, VerificationService verificationService)
     {
         _userRepo = new UserRepository(context);
-        _userService = userService;
+        _verificationService = verificationService;
     }
 
     [Authorize(Policy = Policies.AdminOnly)]
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery]bool withDeleted = false)
+    public async Task<IActionResult> Get([FromQuery]bool withDeleted = false, [FromQuery] bool? active = null)
     {
-        var users = await _userRepo.Get(withDeleted);
+        var users = await _userRepo.GetUsers(withDeleted, active);
         return Ok(users.Select(u => new UserDto
         {
             Id = u.Id,
@@ -80,7 +80,14 @@ public class UserController : ControllerBase
         };
         
         await _userRepo.AddAndSave(user);
-        return NoContent();
+        return Ok(new UserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Role = user.Role,
+            IsActive = user.IsActive,
+            Member = user.Member
+        });
     }
 
     [Authorize(Policy = Policies.AdminOnly)]
@@ -100,7 +107,7 @@ public class UserController : ControllerBase
         var user = await _userRepo.GetByIdWithIncludes(userId);
         if (user == null)
             return NotFound();
-        var code = _userService.CreateRecoveryCode();
+        var code = _verificationService.CreateRecoveryCode();
         user.RecoveryCode = code;
         await _userRepo.Save();
         return Ok($"RecoveryCode for '{user.UserName}': {code}");
@@ -113,9 +120,21 @@ public class UserController : ControllerBase
         var user = await _userRepo.GetUserByRecoveryCode(passwordRecoveryDto.RecoveryCode);
         if (user?.Member == null) 
             return NotFound();
-        if (!await _userService.VerifyPasswordChange(user.Member.DiscordUser, user.Id))
+        if (!await _verificationService.VerifyPasswordChange(user.Member.DiscordUser, user.Id))
             return NoContent();
         await _userRepo.SetPasswordAsync(user.Id, passwordRecoveryDto.NewPassword);
         return Ok("Password changed");
+    }
+
+    [Authorize(Policy = Policies.AdminOnly)]
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> DeleteUser(Guid userId)
+    {
+        var user = await _userRepo.GetByIdWithIncludes(userId, [nameof(AppUser.Member)]);
+        if (user == null)
+            return NotFound();
+        user.Deleted = DateTime.Now.ToUniversalTime();
+        await _userRepo.Save();
+        return NoContent();
     }
 }

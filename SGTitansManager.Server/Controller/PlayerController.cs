@@ -54,6 +54,7 @@ public class PlayerController : ControllerBase
             return NotFound();
         user.Member.PlayerId = player.Id;
         user.Member.Player = player;
+        user.Role = Role.Player;
         await _playerRepo.AddAndSave(player);
         return Ok(player);
     }
