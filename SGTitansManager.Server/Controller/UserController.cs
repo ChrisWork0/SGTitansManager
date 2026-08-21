@@ -25,9 +25,9 @@ public class UserController : ControllerBase
 
     [Authorize(Policy = Policies.AdminOnly)]
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery]bool withDeleted = false)
+    public async Task<IActionResult> Get([FromQuery]bool withDeleted = false, [FromQuery] bool? active = null)
     {
-        var users = await _userRepo.Get(withDeleted);
+        var users = await _userRepo.GetUsers(withDeleted, active);
         return Ok(users.Select(u => new UserDto
         {
             Id = u.Id,
@@ -80,7 +80,14 @@ public class UserController : ControllerBase
         };
         
         await _userRepo.AddAndSave(user);
-        return NoContent();
+        return Ok(new UserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Role = user.Role,
+            IsActive = user.IsActive,
+            Member = user.Member
+        });
     }
 
     [Authorize(Policy = Policies.AdminOnly)]
@@ -117,5 +124,17 @@ public class UserController : ControllerBase
             return NoContent();
         await _userRepo.SetPasswordAsync(user.Id, passwordRecoveryDto.NewPassword);
         return Ok("Password changed");
+    }
+
+    [Authorize(Policy = Policies.AdminOnly)]
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> DeleteUser(Guid userId)
+    {
+        var user = await _userRepo.GetByIdWithIncludes(userId, [nameof(AppUser.Member)]);
+        if (user == null)
+            return NotFound();
+        user.Deleted = DateTime.Now.ToUniversalTime();
+        await _userRepo.Save();
+        return NoContent();
     }
 }

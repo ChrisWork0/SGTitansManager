@@ -1,4 +1,4 @@
-@userId = 01a01ac7-ba5a-7f9a-a53b-c1a13928c16d
+@userId = 01a02349-048f-7ab8-976c-b13ac39c72e1
 @newPassword = test
 
 ### GET Users
@@ -53,11 +53,23 @@ Authorization: {{jwt}}
 
 {
   "userName": "SGC Trafy",
-  "password": "test",
+  "password": "fischerc",
   "memberSince": "2026-08-14",
   "discordId": "1025579600794894386",
-  "role": 0
+  "role": 1
 }
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    })
+%}
+
+### Delete User
+DELETE {{BaseUrl}}/api/Player/{{userId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
 
 > {%
     client.test("Request executed successfully", function () {
@@ -65,7 +77,7 @@ Authorization: {{jwt}}
     })
 %}
 
-### Set Recovery Code
+### Set Password Recovery Code
 PUT {{BaseUrl}}/api/User/set/recovery-code/{{userId}}
 Content-Type: application/json
 Accept: application/json

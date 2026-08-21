@@ -21,6 +21,22 @@ public class UserRepository : Repository<AppUser>
         DbSetMember = dbContext.Set<Member>();
     }
 
+    public async Task<List<AppUser>> GetUsers(bool withDeleted = false, bool? active = null)
+    {
+        if (active == null)
+        {
+            if (!withDeleted)
+                return await DbSet.Where(u => u.Deleted == null).ToListAsync();
+            return await DbSet.ToListAsync();
+        }
+        else
+        {
+            if (!withDeleted)
+                return await DbSet.Where(u => u.Deleted == null && u.IsActive == active).ToListAsync();
+            return await DbSet.Where(u => u.IsActive == active).ToListAsync();
+        }
+    }
+
     public async Task<AppUser?> GetUserByPlayerId(Guid playerId)
     {
         var member = await DbSetMember.FirstOrDefaultAsync(m => m.PlayerId == playerId);

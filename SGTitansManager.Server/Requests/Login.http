@@ -22,7 +22,7 @@ Content-Type: application/json
 
 {
   "userName": "SGC Trafy",
-  "password": "test"
+  "password": "fischerc"
 }
 
 > {% 
